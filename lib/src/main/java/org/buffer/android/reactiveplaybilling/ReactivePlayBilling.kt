@@ -7,7 +7,7 @@ import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.buffer.android.reactiveplaybilling.model.*
 
-class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedListener {
+open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedListener {
 
     private val mapper = ResponseCodeMapper
     private val publishSubject = PublishSubject.create<List<Purchase>>()
