@@ -2,4 +2,4 @@ package org.buffer.android.reactiveplaybilling.model
 
 import org.buffer.android.reactiveplaybilling.BillingResult
 
-class QueryPurchasesError(result: BillingResult) : Throwable()
+class QueryPurchasesError(val result: BillingResult) : Throwable()
