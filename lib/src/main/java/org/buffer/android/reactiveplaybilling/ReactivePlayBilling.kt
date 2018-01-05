@@ -4,11 +4,10 @@ import android.app.Activity
 import android.content.Context
 import com.android.billingclient.api.*
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
 import org.buffer.android.reactiveplaybilling.model.*
 
-class RxBilling constructor(context: Context) : PurchasesUpdatedListener {
+class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedListener {
 
     private val mapper = ResponseCodeMapper
     private val publishSubject = PublishSubject.create<List<Purchase>>()
@@ -23,13 +22,13 @@ class RxBilling constructor(context: Context) : PurchasesUpdatedListener {
         }
     }
 
-    fun connect(): Single<ConnectionResult> {
-        return Single.create {
+    fun connect(): Observable<ConnectionResult> {
+        return Observable.create {
             billingClient.startConnection(object : BillingClientStateListener {
                 override fun onBillingSetupFinished(@BillingClient.BillingResponse
                                                     responseCode: Int) {
                     if (responseCode == BillingClient.BillingResponse.OK) {
-                        it.onSuccess(ConnectionResult(mapper.mapBillingResponse(responseCode)))
+                        it.onNext(ConnectionResult(mapper.mapBillingResponse(responseCode)))
                     } else {
                         it.onError(ConnectionFailure(mapper.mapBillingResponse(responseCode)))
                     }
