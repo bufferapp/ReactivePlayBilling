@@ -109,3 +109,17 @@ You can consume an item that has been purchases by using [consumeItem()](https:/
             }, {
                     // Handle consumption failure
             })
+
+ # Installing
+ 
+ Until we get this onto maven central (we will do once the library has had some more usage for a v1 release) you will need to use Jitpack. This can be done like so:
+ 
+    allprojects {
+        repositories {
+            jcenter()
+            maven { url "https://jitpack.io" }
+        }
+    }
+    dependencies {
+        compile 'com.github.bufferapp:ReactivePlayBilling:-SNAPSHOT'
+    }
