@@ -1,5 +1,5 @@
 package org.buffer.android.reactiveplaybilling.model
 
-import org.buffer.android.reactiveplaybilling.BillingResult
+import com.android.billingclient.api.BillingClient
 
-class SubscriptionResponse(val result: BillingResult)
+class SubscriptionResponse(@BillingClient.BillingResponse val result: Int)

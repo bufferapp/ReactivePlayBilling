@@ -9,7 +9,6 @@ import org.buffer.android.reactiveplaybilling.model.*
 
 open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedListener {
 
-    private val mapper = ResponseCodeMapper
     private val publishSubject = PublishSubject.create<List<Purchase>>()
     private var billingClient: BillingClient =
             BillingClient.newBuilder(context).setListener(this).build()
@@ -18,7 +17,7 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
         if (responseCode == BillingClient.BillingResponse.OK && purchases != null) {
             publishSubject.onNext(purchases)
         } else {
-            publishSubject.onError(PurchasesUpdatedError(mapper.mapBillingResponse(responseCode)))
+            publishSubject.onError(PurchasesUpdatedError(responseCode))
         }
     }
 
@@ -28,9 +27,9 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                 override fun onBillingSetupFinished(@BillingClient.BillingResponse
                                                     responseCode: Int) {
                     if (responseCode == BillingClient.BillingResponse.OK) {
-                        it.onNext(ConnectionResult(mapper.mapBillingResponse(responseCode)))
+                        it.onNext(ConnectionResult(responseCode))
                     } else {
-                        it.onError(ConnectionFailure(mapper.mapBillingResponse(responseCode)))
+                        it.onError(ConnectionFailure(responseCode))
                     }
                 }
 
@@ -53,7 +52,7 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                 if (responseCode == BillingClient.BillingResponse.OK) {
                     it.onNext(p1)
                 } else {
-                    it.onError(ItemsForPurchaseQueryError(mapper.mapBillingResponse(responseCode)))
+                    it.onError(ItemsForPurchaseQueryError(responseCode))
                 }
             }
         }
@@ -67,8 +66,7 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                 if (responseCode == BillingClient.BillingResponse.OK) {
                     it.onNext(p1)
                 } else {
-                    it.onError(ItemsForSubscriptionQueryError(
-                            mapper.mapBillingResponse(responseCode)))
+                    it.onError(ItemsForSubscriptionQueryError(responseCode))
                 }
             }
         }
@@ -82,20 +80,21 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                     .build()
             val responseCode = billingClient.launchBillingFlow(activity, flowParams)
             if (responseCode == BillingClient.BillingResponse.OK) {
-                it.onNext(PurchaseResponse(mapper.mapBillingResponse(responseCode)))
+                it.onNext(PurchaseResponse(responseCode))
             } else {
-                it.onError(ItemsForPurchaseQueryError(mapper.mapBillingResponse(responseCode)))
+                it.onError(PurchaseError(responseCode))
             }
         }
     }
 
     fun queryPurchaseHistory(): Observable<List<Purchase>> {
         return Observable.create {
-            billingClient.queryPurchaseHistoryAsync(BillingClient.SkuType.INAPP) { responseCode, result ->
+            billingClient.queryPurchaseHistoryAsync(BillingClient.SkuType.INAPP) {
+                responseCode, result ->
                 if (responseCode == BillingClient.BillingResponse.OK && result != null) {
                     it.onNext(result)
                 } else {
-                    it.onError(QueryPurchasesError(mapper.mapBillingResponse(responseCode)))
+                    it.onError(QueryPurchasesError(responseCode))
                 }
             }
         }
@@ -108,7 +107,7 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                 if (responseCode == BillingClient.BillingResponse.OK && result != null) {
                     it.onNext(result)
                 } else {
-                    it.onError(QuerySubscriptionsError(mapper.mapBillingResponse(responseCode)))
+                    it.onError(QuerySubscriptionsError(responseCode))
                 }
 
             }
@@ -119,10 +118,9 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
         return Observable.create {
             billingClient.consumeAsync(purchaseToken) { responseCode, outToken ->
                 if (responseCode == BillingClient.BillingResponse.OK) {
-                    it.onNext(ConsumptionResponse(mapper.mapBillingResponse(responseCode),
-                            outToken))
+                    it.onNext(ConsumptionResponse(responseCode, outToken))
                 } else {
-                    it.onError(ConsumptionError(mapper.mapBillingResponse(responseCode)))
+                    it.onError(ConsumptionError(responseCode))
                 }
             }
         }
@@ -136,9 +134,9 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                     .build()
             val responseCode = billingClient.launchBillingFlow(activity, flowParams)
             if (responseCode == BillingClient.BillingResponse.OK) {
-                it.onNext(SubscriptionResponse(mapper.mapBillingResponse(responseCode)))
+                it.onNext(SubscriptionResponse(responseCode))
             } else {
-                it.onError(SubscriptionError(mapper.mapBillingResponse(responseCode)))
+                it.onError(SubscriptionError(responseCode))
             }
         }
     }

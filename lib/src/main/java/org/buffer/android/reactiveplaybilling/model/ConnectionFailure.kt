@@ -1,5 +1,5 @@
 package org.buffer.android.reactiveplaybilling.model
 
-import org.buffer.android.reactiveplaybilling.BillingResult
+import com.android.billingclient.api.BillingClient
 
-class ConnectionFailure(val result: BillingResult? = null) : Throwable()
+class ConnectionFailure(@BillingClient.BillingResponse val result: Int? = null) : Throwable()
