@@ -21,7 +21,7 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
         }
     }
 
-    fun connect(): Observable<ConnectionResult> {
+    open fun connect(): Observable<ConnectionResult> {
         return Observable.create {
             billingClient.startConnection(object : BillingClientStateListener {
                 override fun onBillingSetupFinished(@BillingClient.BillingResponse
@@ -40,11 +40,11 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
         }
     }
 
-    fun observePurchaseUpdates(): Observable<List<Purchase>> {
+    open fun observePurchaseUpdates(): Observable<List<Purchase>> {
         return publishSubject
     }
 
-    fun queryItemsForPurchase(skuList: List<String>): Observable<List<SkuDetails>> {
+    open fun queryItemsForPurchase(skuList: List<String>): Observable<List<SkuDetails>> {
         return Observable.create {
             val params = SkuDetailsParams.newBuilder()
             params.setSkusList(skuList).setType(BillingClient.SkuType.INAPP)
@@ -72,7 +72,7 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
         }
     }
 
-    fun purchaseItem(skuId: String, activity: Activity): Observable<PurchaseResponse> {
+    open fun purchaseItem(skuId: String, activity: Activity): Observable<PurchaseResponse> {
         return Observable.create {
             val flowParams = BillingFlowParams.newBuilder()
                     .setSku(skuId)
@@ -87,7 +87,7 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
         }
     }
 
-    fun queryPurchaseHistory(): Observable<List<Purchase>> {
+    open fun queryPurchaseHistory(): Observable<List<Purchase>> {
         return Observable.create {
             billingClient.queryPurchaseHistoryAsync(BillingClient.SkuType.INAPP) {
                 responseCode, result ->
@@ -100,7 +100,7 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
         }
     }
 
-    fun querySubscriptionHistory(): Observable<List<Purchase>> {
+    open fun querySubscriptionHistory(): Observable<List<Purchase>> {
         return Observable.create {
             billingClient.queryPurchaseHistoryAsync(BillingClient.SkuType.SUBS)
             { responseCode, result ->
@@ -114,7 +114,7 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
         }
     }
 
-    fun consumeItem(purchaseToken: String): Observable<ConsumptionResponse> {
+    open fun consumeItem(purchaseToken: String): Observable<ConsumptionResponse> {
         return Observable.create {
             billingClient.consumeAsync(purchaseToken) { responseCode, outToken ->
                 if (responseCode == BillingClient.BillingResponse.OK) {
@@ -126,7 +126,7 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
         }
     }
 
-    fun purchaseSubscription(skuId: String, activity: Activity): Observable<SubscriptionResponse> {
+    open fun purchaseSubscription(skuId: String, activity: Activity): Observable<SubscriptionResponse> {
         return Observable.create {
             val flowParams = BillingFlowParams.newBuilder()
                     .setSku(skuId)
