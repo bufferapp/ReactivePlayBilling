@@ -141,4 +141,21 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
         }
     }
 
+    open fun upgradeSubscription(oldSkuId: String, newSkuId: String, activity: Activity):
+            Observable<SubscriptionResponse> {
+        return Observable.create {
+            val flowParams = BillingFlowParams.newBuilder()
+                    .addOldSku(oldSkuId)
+                    .setSku(newSkuId)
+                    .setType(BillingClient.SkuType.SUBS)
+                    .build()
+            val responseCode = billingClient.launchBillingFlow(activity, flowParams)
+            if (responseCode == BillingClient.BillingResponse.OK) {
+                it.onNext(SubscriptionResponse(responseCode))
+            } else {
+                it.onError(SubscriptionError(responseCode))
+            }
+        }
+    }
+
 }
