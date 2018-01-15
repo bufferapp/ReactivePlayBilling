@@ -1,6 +1,6 @@
 # Reactive Play Billing
 
-This project acts us a simple wrapper for the [Play Billing Library](https://developer.android.com/google/play/billing/billing_library.html) from Google for Android. This allows you to interact with the library in a reactive manner and use it within your reacrive streams.
+This project acts us a simple wrapper for the [Play Billing Library](https://developer.android.com/google/play/billing/billing_library.html) from Google for Android. This allows you to interact with the library in a reactive manner and use it within your reactive streams.
 
 # Functionality
 
