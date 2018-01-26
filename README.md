@@ -30,7 +30,7 @@ You can observe purchase change by using the [observePurchaseUpdates()](https://
 
 ## Querying in-app items for purchase
 
-You can query items that are available for purchase using the [queryItemsForPurchase()](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/RxBilling.kt#L49) method. When calling, you need to pass in a list of SKU ids that you wish to retrieve the details for. If successful this will return you a list of [SkuDetail](https://developer.android.com/reference/com/android/billingclient/api/SkuDetails.html) instances. Otherwise, a [QueryItemsForPurchaseError](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/model/ItemsForPurchaseQueryError.kt) will be returned.
+You can query items that are available for purchase using the [queryItemsForPurchase()](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/RxBilling.kt#L49) method. When calling, you need to pass in a list of SKU ids that you wish to retrieve the details for. If successful this will return you a list of [SkuDetail](https://developer.android.com/reference/com/android/billingclient/api/SkuDetails.html) instances. Otherwise, a [QueryItemsForPurchaseError](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/model/ItemsForPurchaseResponse.kt) will be returned.
 
     reactiveBilling.queryItemsForPurchase(skuList)
             .subscribe({
@@ -54,7 +54,7 @@ You can query subscriptions that are available for purchase using the [querySubs
 
 You can purchase in-app items by calling the [purchaseItem()](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/RxBilling.kt#L78) method. When calling this you need to pass in the SKU of the item which you wish to perform the purchase request on, followed by a reference to the current activity - this is required for activity result events.
 
-A succesfull request will return an instance of the [PurchaseResponse](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/model/PurchaseResponse.kt) class. An unsuccessful request will return an [ItemsForPurchaseQueryError](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/model/ItemsForPurchaseQueryError.kt).
+A succesfull request will return an instance of the [PurchaseResponse](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/model/PurchaseResponse.kt) class. An unsuccessful request will return an [ItemsForPurchaseQueryError](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/model/ItemsForPurchaseResponse.kt).
 
     reactiveBilling.purchaseItem(sku, activity)
             .subscribe({
@@ -79,7 +79,7 @@ A succesfull request will return an instance of the [SubscriptionResponse](https
             
 ## Querying purchases
 
-You can query previous purchases for the current user by using the [queryPurchaseHistory()](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/ReactivePlayBilling.kt#L92) observable. This will return you a list of Purchase instances upona successful request, but a [QueryPurchasesError](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/model/QueryPurchasesError.kt) if the request fails.
+You can query previous purchases for the current user by using the [queryPurchaseHistory()](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/ReactivePlayBilling.kt#L92) observable. This will return you a list of Purchase instances upona successful request, but a [QueryPurchasesError](https://github.com/bufferapp/ReactivePlayBilling/blob/master/lib/src/main/java/org/buffer/android/reactiveplaybilling/model/QueryPurchasesResponse.kt) if the request fails.
 
     reactiveBilling.queryPurchaseHistory()
             .subscribe({

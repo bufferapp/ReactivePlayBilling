@@ -9,15 +9,16 @@ import org.buffer.android.reactiveplaybilling.model.*
 
 open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedListener {
 
-    private val publishSubject = PublishSubject.create<List<Purchase>>()
+    private val publishSubject = PublishSubject.create<PurchasesUpdatedResponse>()
     private var billingClient: BillingClient =
             BillingClient.newBuilder(context).setListener(this).build()
 
     override fun onPurchasesUpdated(responseCode: Int, purchases: MutableList<Purchase>?) {
-        if (responseCode == BillingClient.BillingResponse.OK && purchases != null) {
-            publishSubject.onNext(purchases)
+        if (responseCode == BillingClient.BillingResponse.OK) {
+            publishSubject.onNext(PurchasesUpdatedResponse.PurchasesUpdatedSuccess(responseCode,
+                    purchases))
         } else {
-            publishSubject.onError(PurchasesUpdatedError(responseCode))
+            publishSubject.onNext(PurchasesUpdatedResponse.PurchaseUpdatedFailure(responseCode))
         }
     }
 
@@ -27,46 +28,49 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                 override fun onBillingSetupFinished(@BillingClient.BillingResponse
                                                     responseCode: Int) {
                     if (responseCode == BillingClient.BillingResponse.OK) {
-                        it.onNext(ConnectionResult(responseCode))
+                        it.onNext(ConnectionResult.ConnectionSuccess(responseCode))
                     } else {
-                        it.onError(ConnectionFailure(responseCode))
+                        it.onNext(ConnectionResult.ConnectionFailure(responseCode))
                     }
                 }
 
                 override fun onBillingServiceDisconnected() {
-                    it.onError(ConnectionFailure())
+                    it.onNext(ConnectionResult.ConnectionFailure())
                 }
             })
         }
     }
 
-    open fun observePurchaseUpdates(): Observable<List<Purchase>> {
+    open fun observePurchaseUpdates(): Observable<PurchasesUpdatedResponse> {
         return publishSubject
     }
 
-    open fun queryItemsForPurchase(skuList: List<String>): Observable<List<SkuDetails>> {
+    open fun queryItemsForPurchase(skuList: List<String>): Observable<ItemsForPurchaseResponse> {
         return Observable.create {
             val params = SkuDetailsParams.newBuilder()
             params.setSkusList(skuList).setType(BillingClient.SkuType.INAPP)
             billingClient.querySkuDetailsAsync(params.build()) { responseCode, p1 ->
                 if (responseCode == BillingClient.BillingResponse.OK) {
-                    it.onNext(p1)
+                    it.onNext(ItemsForPurchaseResponse.ItemsForPurchaseSuccess(responseCode, p1))
                 } else {
-                    it.onError(ItemsForPurchaseQueryError(responseCode))
+                    it.onNext(ItemsForPurchaseResponse.ItemsForPurchaseFailure(responseCode))
                 }
             }
         }
     }
 
-    fun querySubscriptionsForPurchase(skuList: List<String>): Observable<List<SkuDetails>> {
+    fun querySubscriptionsForPurchase(skuList: List<String>):
+            Observable<ItemsForSubscriptionResponse> {
         return Observable.create {
             val params = SkuDetailsParams.newBuilder()
             params.setSkusList(skuList).setType(BillingClient.SkuType.SUBS)
             billingClient.querySkuDetailsAsync(params.build()) { responseCode, p1 ->
                 if (responseCode == BillingClient.BillingResponse.OK) {
-                    it.onNext(p1)
+                    it.onNext(ItemsForSubscriptionResponse.ItemsForSubscriptionSuccess(responseCode,
+                            p1))
                 } else {
-                    it.onError(ItemsForSubscriptionQueryError(responseCode))
+                    it.onNext(ItemsForSubscriptionResponse.ItemsForSubscriptionFailure(
+                            responseCode))
                 }
             }
         }
@@ -80,34 +84,35 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                     .build()
             val responseCode = billingClient.launchBillingFlow(activity, flowParams)
             if (responseCode == BillingClient.BillingResponse.OK) {
-                it.onNext(PurchaseResponse(responseCode))
+                it.onNext(PurchaseResponse.PurchaseSuccess(responseCode))
             } else {
-                it.onError(PurchaseError(responseCode))
+                it.onNext(PurchaseResponse.PurchaseFailure(responseCode))
             }
         }
     }
 
-    open fun queryPurchaseHistory(): Observable<List<Purchase>> {
+    open fun queryPurchaseHistory(): Observable<QueryPurchasesResponse> {
         return Observable.create {
             billingClient.queryPurchaseHistoryAsync(BillingClient.SkuType.INAPP) {
                 responseCode, result ->
                 if (responseCode == BillingClient.BillingResponse.OK && result != null) {
-                    it.onNext(result)
+                    it.onNext(QueryPurchasesResponse.QueryPurchasesSuccess(responseCode, result))
                 } else {
-                    it.onError(QueryPurchasesError(responseCode))
+                    it.onNext(QueryPurchasesResponse.QueryPurchasesFailure(responseCode))
                 }
             }
         }
     }
 
-    open fun querySubscriptionHistory(): Observable<List<Purchase>> {
+    open fun querySubscriptionHistory(): Observable<QuerySubscriptionsResponse> {
         return Observable.create {
             billingClient.queryPurchaseHistoryAsync(BillingClient.SkuType.SUBS)
             { responseCode, result ->
                 if (responseCode == BillingClient.BillingResponse.OK && result != null) {
-                    it.onNext(result)
+                    it.onNext(QuerySubscriptionsResponse.QuerySubscriptionsSuccess(responseCode,
+                            result))
                 } else {
-                    it.onError(QuerySubscriptionsError(responseCode))
+                    it.onNext(QuerySubscriptionsResponse.QuerySubscriptionsFailure(responseCode))
                 }
 
             }
@@ -118,15 +123,16 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
         return Observable.create {
             billingClient.consumeAsync(purchaseToken) { responseCode, outToken ->
                 if (responseCode == BillingClient.BillingResponse.OK) {
-                    it.onNext(ConsumptionResponse(responseCode, outToken))
+                    it.onNext(ConsumptionResponse.ConsumptionSuccess(responseCode, outToken))
                 } else {
-                    it.onError(ConsumptionError(responseCode))
+                    it.onNext(ConsumptionResponse.ConsumptionFailure(responseCode))
                 }
             }
         }
     }
 
-    open fun purchaseSubscription(skuId: String, activity: Activity): Observable<SubscriptionResponse> {
+    open fun purchaseSubscription(skuId: String, activity: Activity):
+            Observable<SubscriptionResponse> {
         return Observable.create {
             val flowParams = BillingFlowParams.newBuilder()
                     .setSku(skuId)
@@ -134,9 +140,9 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                     .build()
             val responseCode = billingClient.launchBillingFlow(activity, flowParams)
             if (responseCode == BillingClient.BillingResponse.OK) {
-                it.onNext(SubscriptionResponse(responseCode))
+                it.onNext(SubscriptionResponse.SubscriptionSuccess(responseCode))
             } else {
-                it.onError(SubscriptionError(responseCode))
+                it.onNext(SubscriptionResponse.SubscriptionFailure(responseCode))
             }
         }
     }
@@ -151,9 +157,9 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                     .build()
             val responseCode = billingClient.launchBillingFlow(activity, flowParams)
             if (responseCode == BillingClient.BillingResponse.OK) {
-                it.onNext(SubscriptionResponse(responseCode))
+                it.onNext(SubscriptionResponse.SubscriptionSuccess(responseCode))
             } else {
-                it.onError(SubscriptionError(responseCode))
+                it.onNext(SubscriptionResponse.SubscriptionFailure(responseCode))
             }
         }
     }
