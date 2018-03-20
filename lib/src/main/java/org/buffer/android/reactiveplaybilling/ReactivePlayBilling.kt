@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import com.android.billingclient.api.*
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
 import org.buffer.android.reactiveplaybilling.model.*
 
@@ -87,6 +88,18 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                 it.onNext(PurchaseResponse.PurchaseSuccess(responseCode))
             } else {
                 it.onNext(PurchaseResponse.PurchaseFailure(responseCode))
+            }
+        }
+    }
+
+    open fun queryPurchases(): Single<List<Purchase>> {
+        return Single.create {
+            val queryResult = billingClient.queryPurchases(BillingClient.SkuType.INAPP)
+
+            if (queryResult.responseCode == BillingClient.BillingResponse.OK) {
+                it.onSuccess(queryResult.purchasesList)
+            } else {
+                it.onError(Throwable("Failed to query purchases. Response code: ${queryResult.responseCode}"))
             }
         }
     }
