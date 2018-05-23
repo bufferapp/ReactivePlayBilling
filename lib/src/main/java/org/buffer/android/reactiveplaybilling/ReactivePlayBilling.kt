@@ -2,11 +2,25 @@ package org.buffer.android.reactiveplaybilling
 
 import android.app.Activity
 import android.content.Context
-import com.android.billingclient.api.*
+import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.BillingClientStateListener
+import com.android.billingclient.api.BillingFlowParams
+import com.android.billingclient.api.Purchase
+import com.android.billingclient.api.PurchasesUpdatedListener
+import com.android.billingclient.api.SkuDetailsParams
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
-import org.buffer.android.reactiveplaybilling.model.*
+import org.buffer.android.reactiveplaybilling.model.ConnectionResult
+import org.buffer.android.reactiveplaybilling.model.ConsumptionResponse
+import org.buffer.android.reactiveplaybilling.model.ItemsForPurchaseResponse
+import org.buffer.android.reactiveplaybilling.model.ItemsForSubscriptionResponse
+import org.buffer.android.reactiveplaybilling.model.PurchaseResponse
+import org.buffer.android.reactiveplaybilling.model.PurchasesUpdatedResponse
+import org.buffer.android.reactiveplaybilling.model.QueryPurchasesResponse
+import org.buffer.android.reactiveplaybilling.model.QuerySubscriptionsResponse
+import org.buffer.android.reactiveplaybilling.model.SubscriptionResponse
 
 open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedListener {
 
@@ -39,6 +53,13 @@ open class ReactivePlayBilling constructor(context: Context) : PurchasesUpdatedL
                     it.onNext(ConnectionResult.ConnectionFailure())
                 }
             })
+        }
+    }
+
+    open fun disconnect(): Completable {
+        return Completable.defer {
+            billingClient.endConnection()
+            Completable.complete()
         }
     }
 
